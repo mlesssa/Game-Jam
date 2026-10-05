@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://t76yypuwcefw"
-path="res://.godot/imported/ComicNeue-Bold.ttf-af8ff781fdbc1d8383a23353a1bad950.fontdata"
+uid="uid://dngch0au6vtry"
+path="res://.godot/imported/Silkscreen-Bold.ttf-c5bfe206a7f26b7a826f144afbfe2747.fontdata"
 
 [deps]
 
-source_file="res://assets/fonts/ComicNeue-Bold.ttf"
-dest_files=["res://.godot/imported/ComicNeue-Bold.ttf-af8ff781fdbc1d8383a23353a1bad950.fontdata"]
+source_file="res://assets/fonts/Silkscreen-Bold.ttf"
+dest_files=["res://.godot/imported/Silkscreen-Bold.ttf-c5bfe206a7f26b7a826f144afbfe2747.fontdata"]
 
 [params]
 

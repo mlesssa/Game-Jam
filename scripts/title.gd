@@ -44,10 +44,11 @@ func _go() -> void:
 	Game.main.to_page()
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, 640, 360), Art.PAPER)
-	for y in range(0, 360, 12):
-		for x in range(((y / 12) % 2) * 6, 640, 12):
-			draw_circle(Vector2(x, y), 1.3, Color(0.88, 0.8, 0.62, 0.7))
+	var bgt := Slots.tex("res://assets/title.png")
+	if bgt:
+		draw_texture_rect(bgt, Rect2(0, 0, 640, 360), false)
+	else:
+		draw_rect(Rect2(0, 0, 640, 360), Art.PAPER)
 	# creeping ink on the left
 	var pts := PackedVector2Array([Vector2(-10, -10)])
 	var y := -10.0
@@ -58,21 +59,21 @@ func _draw() -> void:
 	draw_colored_polygon(pts, Art.INK)
 	# logo
 	var f: Font = Game.font
-	for o in [Vector2(5, 5), Vector2(-2, 0), Vector2(2, 0), Vector2(0, -2), Vector2(0, 2), Vector2(4, 4)]:
-		draw_string(f, Vector2(168, 130) + o, "BLEED", HORIZONTAL_ALIGNMENT_LEFT, -1, 110, Art.INK)
-	draw_string(f, Vector2(168, 130), "BLEED", HORIZONTAL_ALIGNMENT_LEFT, -1, 110, Color("ff5a36"))
-	# drips off the logo
+	var lw: float = f.get_string_size("BLEED", HORIZONTAL_ALIGNMENT_LEFT, -1, 72).x
+	var lx := 320.0 - lw * 0.5
+	for o in [Vector2(4, 4), Vector2(-2, 0), Vector2(2, 0), Vector2(0, -2), Vector2(0, 2)]:
+		draw_string(f, Vector2(lx, 120) + o, "BLEED", HORIZONTAL_ALIGNMENT_LEFT, -1, 72, Art.INK)
+	draw_string(f, Vector2(lx, 120), "BLEED", HORIZONTAL_ALIGNMENT_LEFT, -1, 72, Color("ff5a36"))
 	for k in 5:
-		var dx := 200.0 + k * 62.0
-		var dl := 8.0 + (sin(t * 2.0 + k * 1.7) + 1.0) * 6.0
-		draw_rect(Rect2(dx, 132, 4, dl), Art.INK)
-		draw_circle(Vector2(dx + 2, 132 + dl), 3.0, Art.INK)
+		var dx := lx + 14.0 + k * (lw / 5.0)
+		var dl := 6.0 + floorf((sin(t * 2.0 + k * 1.7) + 1.0) * 4.0)
+		draw_rect(Rect2(dx, 124, 4, dl), Art.INK)
 	var sub := "Two notes of a lyre. One comic page. Keep the light alive."
-	draw_string(Game.font_hand, Vector2(320 - Game.font_hand.get_string_size(sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x * 0.5, 180), sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Art.INK)
+	draw_string(Game.font_hand, Vector2(320 - Game.font_hand.get_string_size(sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x * 0.5, 170), sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Art.INK)
 	# the two notes
 	for k in 2:
 		var tx := tex_a if k == 0 else tex_b
-		var cx := 108.0 if k == 0 else 540.0
+		var cx := 70.0 if k == 0 else 570.0
 		var by := 200.0 + sin(t * 2.5 + k * 1.5) * 6.0
 		if k == 1:
 			for r in 3:
@@ -85,9 +86,5 @@ func _draw() -> void:
 		draw_rect(Rect2(r.position + Vector2(4, 4), r.size), Color(0, 0, 0, 0.3))
 		draw_rect(r, Art.INK)
 		draw_rect(r.grow(-3), Art.YELLOW if on else Art.PAPER)
-		var tw: float = Game.font.get_string_size(items[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 22).x
-		draw_string(Game.font, Vector2(r.position.x + (r.size.x - tw) * 0.5, r.position.y + 25), items[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Art.INK)
-	var h1 := "P1: A D W S      P2: arrow keys      Solo: any keys, Q swaps notes      Esc: back"
-	draw_string(Game.font_hand, Vector2(320 - Game.font_hand.get_string_size(h1, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x * 0.5, 328), h1, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Art.INK)
-	var h2 := "W / S to choose, Enter to start"
-	draw_string(Game.font_hand, Vector2(320 - Game.font_hand.get_string_size(h2, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x * 0.5, 346), h2, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.3, 0.27, 0.3))
+		var tw: float = Game.font.get_string_size(items[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
+		draw_string(Game.font, Vector2(r.position.x + (r.size.x - tw) * 0.5, r.position.y + 22), items[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Art.INK)

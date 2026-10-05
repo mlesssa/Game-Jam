@@ -117,8 +117,8 @@ func _process(_dt: float) -> void:
 
 func _draw() -> void:
 	var active: bool = Game.mode == "coop" or Game.solo_active == idx
-	var h := 28.0 * (0.55 if ducking else 1.0) * (1.0 + squash)
-	var w := 28.0 * (1.15 if ducking else 1.0) * (1.0 - squash * 0.6)
+	var h := 24.0 * (0.58 if ducking else 1.0) * (1.0 + squash)
+	var w := 24.0 * (1.15 if ducking else 1.0) * (1.0 - squash * 0.6)
 	var centre := Vector2(0, -h * 0.5 + 2.0)
 	var glow := Color(0.45, 0.95, 1.0) if idx == 1 else Color(1.0, 0.9, 0.7)
 	var gs := 1.0 if active else 0.5

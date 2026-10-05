@@ -19,8 +19,8 @@ var length := 4000.0
 var players: Array = []
 var t := 0.0
 var camx := 320.0
-var ink_x := -260.0
-var ink_on := false
+var ink_x := -40.0
+var ink_on := true
 var cp_i := -1
 var cur_solids: Array = []
 var static_solids: Array = []
@@ -46,6 +46,8 @@ var quipped := false
 var world_top: DrawProxy
 var hud: DrawProxy
 var backdrop: DrawProxy
+var figs: DrawProxy
+var plague_mat: ShaderMaterial
 
 func cam_left() -> float:
 	return camx - 320.0
@@ -62,7 +64,16 @@ func setup(i: int) -> void:
 	add_child(bl)
 	backdrop = DrawProxy.new()
 	backdrop.cb = Callable(self, "_draw_backdrop")
+	plague_mat = ShaderMaterial.new()
+	plague_mat.shader = load("res://shaders/plague.gdshader")
+	plague_mat.set_shader_parameter("halo_f", HALO / 640.0)
+	backdrop.material = plague_mat
 	bl.add_child(backdrop)
+	figs = DrawProxy.new()
+	figs.cb = Callable(self, "_draw_figs")
+	figs.z_index = -1
+	figs.material = plague_mat
+	add_child(figs)
 	for k in 2:
 		var p := Player.new()
 		p.idx = k
@@ -133,8 +144,8 @@ func _respawn() -> void:
 		p.ducking = false
 		p.on_floor = true
 		p.prev_y = GY
-	ink_x = -260.0 if cp_i < 0 else x - 380.0
-	ink_on = cp_i >= 0
+	ink_x = -40.0 if cp_i < 0 else x - 380.0
+	ink_on = true
 	drops.clear()
 	drop_t = 3.0
 	camx = clampf(x, 320.0, length - 320.0)
@@ -230,10 +241,6 @@ func _update_checkpoints() -> void:
 		Sfx.play("checkpoint")
 
 func _update_ink(dt: float) -> void:
-	if not ink_on and lead_x() > 140.0:
-		ink_on = true
-	if not ink_on:
-		return
 	var dist := rear_x() - ink_x
 	var k := 1.0
 	if dist > 480.0:
@@ -293,9 +300,6 @@ func _check_death() -> void:
 		Game.total_deaths += 1
 		dead_t = 0.8
 		Sfx.play("death")
-		if not quipped:
-			quipped = true
-			queue.push_front("Ouch! Ink got you. Lanterns remember where you were.")
 		return
 
 func _check_goal(dt: float) -> void:
@@ -352,29 +356,32 @@ func _update_story(dt: float) -> void:
 var _say := {}
 
 func _process(_dt: float) -> void:
+	plague_mat.set_shader_parameter("ink_f", (ink_x - cam_left()) / 640.0)
 	queue_redraw()
 
 # ------------------------------------------------------------ drawing
+func _draw_figs(c: CanvasItem) -> void:
+	var left := cam_left()
+	for s in data.scenery:
+		var x: float = s[1] * length
+		if x > left - 80 and x < left + 720:
+			Slots.figure(c, s[0], x, GY, t, s[2])
+	for s in data.story:
+		var x: float = s.at * length
+		if x > left - 80 and x < left + 720:
+			Slots.figure(c, s.who, x, GY, t, s.flip)
+
 func _col(c: Color, wx: float) -> Color:
 	return Art.g(c, gray(wx))
 
 func _draw_backdrop(c: CanvasItem) -> void:
-	Backdrop.draw(c, data.theme, cam_left(), ink_x, t, lead_x() / length)
+	Backdrop.draw(c, idx, data.theme, cam_left(), length)
 
 func _draw() -> void:
 	var th: String = data.theme
 	var left := cam_left()
 	var gc: Array = GROUND[th]
 	var acc: Color = ACCENT[th]
-	# story characters stand behind everything
-	for s in data.scenery:
-		var x: float = s[1] * length
-		if x > left - 60 and x < left + 700:
-			Art.figure(self, s[0], x, GY, t, gray(x), s[2])
-	for s in data.story:
-		var x: float = s.at * length
-		if x > left - 60 and x < left + 700:
-			Art.figure(self, s.who, x, GY, t, gray(x), s.flip)
 	# ground
 	var x0 := floorf(left / 16.0) * 16.0
 	for r in static_solids:
@@ -448,7 +455,7 @@ func _draw() -> void:
 		draw_rect(Rect2(r2.position + Vector2(3, 3), r2.size), Color(0, 0, 0, 0.3))
 		draw_rect(r2, Art.INK)
 		draw_rect(r2.grow(-3), _col(Art.YELLOW, b[0]))
-		draw_string(Game.font, Vector2(b[0] + 6, b[1] + 17), b[4], HORIZONTAL_ALIGNMENT_LEFT, b[2] - 8, 14, _col(Art.INK, b[0]))
+		draw_multiline_string(Game.font, Vector2(b[0] + 5, b[1] + 12), b[4], HORIZONTAL_ALIGNMENT_LEFT, b[2] - 8, 8, -1, _col(Art.INK, b[0]))
 	for i in oneways.size():
 		var r3: Rect2 = oneways[i]
 		if r3.position.x > left + 700 or r3.end.x < left - 40:
@@ -550,17 +557,15 @@ func _draw_hud(c: CanvasItem) -> void:
 	var tw := fs.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x + 16.0
 	c.draw_rect(Rect2(10, 332, tw, 20), Art.YELLOW)
 	c.draw_rect(Rect2(10, 332, tw, 20), Art.INK, false, 2.0)
-	c.draw_string(fs, Vector2(18, 348), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Art.INK)
-	var hint := "Q swap   R retry   Esc page" if Game.mode == "solo" else "R retry   Esc page"
-	c.draw_string(Game.font_hand, Vector2(630 - Game.font_hand.get_string_size(hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x, 348), hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1, 1, 1, 0.8))
+	c.draw_string(fs, Vector2(18, 346), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Art.INK)
 	# progress dots
 	var prog := clampf(lead_x() / length, 0.0, 1.0)
-	c.draw_rect(Rect2(220, 340, 200, 6), Color(0, 0, 0, 0.45))
-	c.draw_rect(Rect2(220, 340, 200 * prog, 6), Art.YELLOW)
+	c.draw_rect(Rect2(420, 340, 200, 6), Color(0, 0, 0, 0.45))
+	c.draw_rect(Rect2(420, 340, 200 * prog, 6), Art.YELLOW)
 	if dead_t > 0.0:
 		var a := clampf(dead_t * 2.0, 0.0, 1.0)
 		c.draw_rect(Rect2(0, 0, 640, 360), Color(0.08, 0.07, 0.1, 0.55 * a))
-		c.draw_string(Game.font, Vector2(235, 190), "SPLAT!", HORIZONTAL_ALIGNMENT_LEFT, -1, 54, Color(1, 0.35, 0.3, a))
+		c.draw_string(Game.font, Vector2(190, 190), "SPLAT!", HORIZONTAL_ALIGNMENT_LEFT, -1, 48, Color(1, 0.35, 0.3, a))
 	if finished:
 		var f := clampf(fin_t * 1.5, 0.0, 1.0)
-		c.draw_string(Game.font, Vector2(150, 150), "PANEL COMPLETE!", HORIZONTAL_ALIGNMENT_LEFT, -1, 52, Color(1, 0.97, 0.7, f))
+		c.draw_string(Game.font, Vector2(112, 150), "PANEL COMPLETE!", HORIZONTAL_ALIGNMENT_LEFT, -1, 32, Color(1, 0.97, 0.7, f))

@@ -16,8 +16,13 @@ var font: Font
 var font_hand: Font
 
 func _ready() -> void:
-	font = load("res://assets/fonts/Bangers-Regular.ttf")
-	font_hand = load("res://assets/fonts/ComicNeue-Bold.ttf")
+	font = load("res://assets/fonts/Silkscreen-Bold.ttf")
+	font_hand = load("res://assets/fonts/PixelifySans.ttf")
+	for f in [font, font_hand]:
+		f.antialiasing = TextServer.FONT_ANTIALIASING_NONE
+		f.subpixel_positioning = TextServer.SUBPIXEL_POSITIONING_DISABLED
+		f.hinting = TextServer.HINTING_NONE
+		f.generate_mipmaps = false
 	_setup_input()
 	_load()
 

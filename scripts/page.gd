@@ -54,18 +54,15 @@ func _draw() -> void:
 	draw_rect(Rect2(14, 6, 612, 348), Art.SHADOW)
 	draw_rect(Rect2(10, 2, 612, 348), Art.PAPER)
 	var f: Font = Game.font
-	draw_string(f, Vector2(50, 34), "BLEED", HORIZONTAL_ALIGNMENT_LEFT, -1, 34, Color("ff5a36"))
-	draw_string(f, Vector2(48, 32), "BLEED", HORIZONTAL_ALIGNMENT_LEFT, -1, 34, Art.INK)
-	draw_string(f, Vector2(50, 32), "BLEED", HORIZONTAL_ALIGNMENT_LEFT, -1, 34, Color("ff5a36"))
-	var hint := "W / S choose     Enter play     Esc title"
-	draw_string(Game.font_hand, Vector2(592 - Game.font_hand.get_string_size(hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x, 30), hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Art.INK)
+	draw_string(f, Vector2(50, 33), "BLEED", HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Art.INK)
+	draw_string(f, Vector2(48, 31), "BLEED", HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color("ff5a36"))
 	for i in Game.LEVEL_COUNT:
 		_strip(i)
 	var done_n := 0
 	for d in Game.done:
 		if d:
 			done_n += 1
-	draw_string(Game.font_hand, Vector2(50, 344), "Panels saved: %d / %d     Splats: %d" % [done_n, Game.LEVEL_COUNT, Game.total_deaths], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Art.INK)
+	draw_string(Game.font_hand, Vector2(50, 343), "Panels saved: %d / %d     Splats: %d" % [done_n, Game.LEVEL_COUNT, Game.total_deaths], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Art.INK)
 
 func _strip(i: int) -> void:
 	var data: Dictionary = Levels.all()[i] if _cache.size() <= i else _cache[i]
@@ -84,24 +81,15 @@ func _strip(i: int) -> void:
 	draw_rect(Rect2(r.position + Vector2(3, 3), r.size), Color(0, 0, 0, 0.25))
 	draw_rect(r, Art.INK)
 	var inner := r.grow(-3)
-	draw_polygon(PackedVector2Array([inner.position, Vector2(inner.end.x, inner.position.y), inner.end, Vector2(inner.position.x, inner.end.y)]),
-		PackedColorArray([tp.top, tp.top, tp.bot, tp.bot]))
-	# hills
-	var hp := PackedVector2Array([Vector2(inner.position.x, inner.end.y)])
-	var x := inner.position.x
-	while x <= inner.end.x:
-		hp.append(Vector2(x, inner.end.y - 12.0 - 8.0 * (sin(x * 0.03 + i) + 0.5 * sin(x * 0.07))))
-		x += 8.0
-	hp.append(Vector2(inner.end.x, inner.end.y))
-	draw_colored_polygon(hp, tp.mid)
-	draw_rect(Rect2(inner.position.x, inner.end.y - 5, inner.size.x, 5), Color(0.1, 0.08, 0.12, 0.5))
-	# the story, in miniature
-	var kinds: Array = data.thumb
-	for k in kinds.size():
-		var px := inner.position.x + inner.size.x * (0.3 + 0.17 * k) + (30.0 if kinds.size() == 2 else 0.0)
-		draw_set_transform(Vector2(px, inner.end.y - 4), 0, Vector2(0.42, 0.42))
-		Art.figure(self, kinds[k], 0.0, 0.0, t, 0.0, k % 2 == 1)
-		draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
+	var tx := Slots.tex("res://assets/thumbs/level%d.png" % (i + 1))
+	if tx:
+		draw_texture_rect(tx, inner, false)
+	else:
+		draw_polygon(PackedVector2Array([inner.position, Vector2(inner.end.x, inner.position.y), inner.end, Vector2(inner.position.x, inner.end.y)]),
+			PackedColorArray([tp.top, tp.top, tp.bot, tp.bot]))
+		var lab := "thumbs/level%d.png" % (i + 1)
+		var lw: float = Game.font.get_string_size(lab, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
+		draw_string(Game.font, Vector2(inner.position.x + inner.size.x * 0.5 - lw * 0.5, inner.position.y + 32), lab, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1, 1, 1, 0.55))
 	# the plague creeps in from the left, further each page
 	var ink_w := 10.0 + i * 14.0
 	if Game.done[i]:
@@ -115,13 +103,13 @@ func _strip(i: int) -> void:
 	draw_colored_polygon(ip, Art.INK)
 	# title caption
 	var txt := ("%s. %s" % [data.roman, data.title]) if not locked else "%s. ???" % data.roman
-	var cw: float = Game.font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x + 12.0
+	var cw: float = Game.font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x + 12.0
 	draw_rect(Rect2(inner.position.x + 22, inner.position.y + 2, cw, 18), Art.YELLOW)
 	draw_rect(Rect2(inner.position.x + 22, inner.position.y + 2, cw, 18), Art.INK, false, 2.0)
-	draw_string(Game.font, Vector2(inner.position.x + 28, inner.position.y + 16), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Art.INK)
+	draw_string(Game.font, Vector2(inner.position.x + 28, inner.position.y + 14), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Art.INK)
 	if locked:
 		draw_rect(inner, Color(0.08, 0.07, 0.1, 0.82))
-		draw_string(Game.font, Vector2(inner.position.x + inner.size.x * 0.5 - 40, inner.position.y + 38), "NOT YET...", HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(0.6, 0.6, 0.65))
+		draw_string(Game.font, Vector2(inner.position.x + inner.size.x * 0.5 - 40, inner.position.y + 34), "NOT YET...", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.6, 0.6, 0.65))
 		draw_rect(Rect2(inner.position.x + 22, inner.position.y + 2, cw, 18), Color(0.08, 0.07, 0.1, 0.82))
 	elif Game.done[i]:
 		var c := Vector2(inner.end.x - 20, inner.position.y + 18)

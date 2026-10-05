@@ -40,7 +40,7 @@ Tests (optional): `godot --headless -s tools/bot.gd` plays all five levels with 
 
 ## How it is made
 
-Everything is drawn in code (backdrops, characters, panels, ink) except the two player sprites and the fonts. Levels are plain data in `scripts/levels.gd`. See [CREDITS.md](CREDITS.md) for fonts and the full AI disclosure.
+The game renders at 640x360 and scales up with nearest-neighbour filtering for a pixel look. Panels, plates, gates and the ink are drawn in code. The comic art (backgrounds, story characters, page thumbnails, title image) comes from image files in `assets/`; see `assets/SLOTS.md`. Levels are plain data in `scripts/levels.gd`. See [CREDITS.md](CREDITS.md) for fonts and the full AI disclosure.
 
 ## Team
 

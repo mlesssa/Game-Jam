@@ -56,5 +56,5 @@ func _draw() -> void:
 		Art.caption(self, txt, Rect2(80, 24, 480, 52), 14)
 	if t > 25.0:
 		var a := clampf((t - 25.0) / 1.5, 0.0, 1.0)
-		draw_string(Game.font, Vector2(206, 150), "THE END", HORIZONTAL_ALIGNMENT_LEFT, -1, 74, Color(Art.INK.r, Art.INK.g, Art.INK.b, a))
-		draw_string(Game.font_hand, Vector2(214, 330), "Thanks for playing.  Press Enter for the title.", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(1, 1, 1, a))
+		draw_string(Game.font, Vector2(140, 150), "THE END", HORIZONTAL_ALIGNMENT_LEFT, -1, 64, Color(Art.INK.r, Art.INK.g, Art.INK.b, a))
+		draw_string(Game.font_hand, Vector2(190, 330), "Thanks for playing.  Press Enter for the title.", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(1, 1, 1, a))
